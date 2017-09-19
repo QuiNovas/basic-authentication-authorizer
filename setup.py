@@ -17,7 +17,6 @@ lambda_name = 'basic-authentication-authorizer'
 # https://packaging.python.org/en/latest/single_source_version.html
 lambda_version = '0.0.1'
 
-# TODO: Change the description
 lambda_description = 'Lambda implementing basic-authentication for API Gateway'
 
 # How mature is this project? Common values are
