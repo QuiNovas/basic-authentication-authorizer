@@ -24,42 +24,39 @@ def handler(event, context):
     username = user_pass[0]
     password = user_pass[1]
 
-    dynamodb = boto3.client('dynamodb')
+    dynamodb = boto3.resource('dynamodb')
 
-    user_response = dynamodb.get_item(
+    users_table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+
+    user_response = users_table.get_item(
         Key={
-            'Username': {
-                'S': username
-            }
-        },
-        TableName=os.environ['USERS_TABLE_NAME']
+            'Username': username
+        }
     )
 
     if 'Item' not in user_response:
         logger.info('Username {} not in table {}'.format(username, os.environ['USERS_TABLE_NAME']))
         raise Exception('Unauthorized')
 
-    if user_response['Item']['Password']['S'] != hashlib.sha256(password).hexdigest():
+    if user_response['Item']['Password'] != hashlib.sha256(password).hexdigest():
         logger.info('Password for username {} not {}'.format(username, password))
         raise Exception('Unauthorized')
 
-    policy_response = dynamodb.get_item(
+    groups_table = dynamodb.Table(os.environ['GROUPS_TABLE_NAME'])
+
+    policy_response = groups_table.get_item(
         Key={
-            'GroupId': {
-                'S': user_response['Item']['GroupId']['S']
-            }
-        },
-        TableName=os.environ['GROUPS_TABLE_NAME']
+            'GroupId': user_response['Item']['GroupId']
+        }
     )
 
     if 'Item' not in policy_response:
-        logger.error('GroupId {} not table {}'.format(user_response['Item']['GroupId']['S'], os.environ['GROUPS_TABLE_NAME']))
+        logger.error('GroupId {} not table {}'.format(user_response['Item']['GroupId'], os.environ['GROUPS_TABLE_NAME']))
         raise Exception('Unauthorized')
 
-    logger.info('Setting policy {} for username'.format(username, policy_response['Item']['Policy']['S']))
+    logger.info('Setting policy {} for username'.format(username, policy_response['Item']['Policy']))
 
     return {
         'principalId': username,
-        'policyDocument': policy_response['Item']['Policy']['S']
+        'policyDocument': policy_response['Item']['Policy']
     }
-
