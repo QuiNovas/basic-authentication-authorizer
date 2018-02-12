@@ -54,7 +54,7 @@ def handler(event, context):
         logger.error('GroupId {} not table {}'.format(user_response['Item']['GroupId'], os.environ['GROUPS_TABLE_NAME']))
         raise Exception('Unauthorized')
 
-    logger.info('Setting policy {} for username'.format(username, policy_response['Item']['Policy']))
+    logger.info('Setting policy {} for username {}'.format(policy_response['Item']['Policy'], username))
 
     return {
         'principalId': username,
