@@ -1,5 +1,5 @@
 # Include the license file
-include LICENSE.txt
+include LICENSE
 
 # Include all ini files in packages under src
 recursive-include src *.ini
